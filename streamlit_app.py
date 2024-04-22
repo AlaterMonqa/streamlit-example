@@ -4,6 +4,7 @@ import pandas as pd
 import streamlit as st
 
 
+
 import sqlite3
 from datetime import datetime
 
@@ -52,26 +53,31 @@ st.set_page_config(page_title="Appointment Scheduler", page_icon="🏥", layout=
 # Title
 st.title("Welcome to the Appointment Scheduler")
 
-# Sidebar
-st.sidebar.header("Patient Details")
-patient_name = st.sidebar.text_input("Patient Name")
-patient_age = st.sidebar.number_input("Patient Age", min_value=0, max_value=150, step=1)
-patient_gender = st.sidebar.selectbox("Patient Gender", ["Male", "Female", "Other"])
-patient_issues = st.sidebar.text_area("Patient Issues")
+# Sidebar for user authentication
+user_type = st.sidebar.radio("Login as", ("Doctor", "Patient"))
 
-# Date and time picker
-appointment_date = st.sidebar.date_input("Appointment Date")
-appointment_time = st.sidebar.time_input("Appointment Time")
+# Login form based on user type
+if user_type == "Doctor":
+    st.sidebar.header("Doctor Login")
+    username = st.sidebar.text_input("Username")
+    password = st.sidebar.text_input("Password", type="password")
 
-# Button to schedule appointment
-if st.sidebar.button("Schedule Appointment"):
-    # Convert time to string
-    appointment_time_str = appointment_time.strftime("%H:%M")
-    # Insert the appointment into the database
-    appointment_data = (patient_name, patient_age, patient_gender, patient_issues, str(appointment_date), appointment_time_str)
-    insert_appointment(conn, appointment_data)
-    # Confirmation message
-    st.success("Appointment scheduled successfully!")
+    if st.sidebar.button("Login"):
+        # Check if username and password are correct (dummy authentication for demonstration)
+        if username == "doctor" and password == "password":
+            st.success("Doctor login successful!")
+        else:
+            st.error("Invalid username or password.")
+elif user_type == "Patient":
+    st.sidebar.header("Patient Login")
+    patient_id = st.sidebar.text_input("Patient ID")
+
+    if st.sidebar.button("Login"):
+        # Check if patient ID exists in the database (dummy authentication for demonstration)
+        if patient_id:
+            st.success("Patient login successful!")
+        else:
+            st.error("Invalid patient ID.")
 
 # Display scheduled appointments
 st.header("Scheduled Appointments")
