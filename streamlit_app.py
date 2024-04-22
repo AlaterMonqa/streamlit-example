@@ -125,7 +125,7 @@ elif option == "Create Account":
     user_type = st.radio("Select account type", ("Patient", "Doctor"))
     create_account_button = st.button("Create Account")
 
-    if create_account_button:
+    if st.button("Create Account"):
         add_user(new_username, new_password, user_type)
         st.success("Account created successfully!")
         st.session_state.runpage = PD_Page
