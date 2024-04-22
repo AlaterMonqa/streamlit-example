@@ -3,38 +3,47 @@ import numpy as np
 import pandas as pd
 import streamlit as st
 
-"""
-# Welcome to Streamlit!
 
-Edit `/streamlit_app.py` to customize this app to your heart's desire :heart:.
-If you have any questions, checkout our [documentation](https://docs.streamlit.io) and [community
-forums](https://discuss.streamlit.io).
 
-In the meantime, below is an example of what you can do with just a few lines of code:
-"""
+# Page layout
+st.set_page_config(page_title="Appointment Scheduler", page_icon="🏥", layout="wide")
 
-num_points = st.slider("Number of points in spiral", 1, 10000, 1100)
-num_turns = st.slider("Number of turns in spiral", 1, 300, 31)
+# Title
+st.title("Welcome to the Appointment Scheduler")
 
-indices = np.linspace(0, 1, num_points)
-theta = 2 * np.pi * num_turns * indices
-radius = indices
+# Sidebar
+st.sidebar.header("Patient Details")
+patient_name = st.sidebar.text_input("Patient Name")
+patient_age = st.sidebar.number_input("Patient Age", min_value=0, max_value=150, step=1)
+patient_gender = st.sidebar.selectbox("Patient Gender", ["Male", "Female", "Other"])
 
-x = radius * np.cos(theta)
-y = radius * np.sin(theta)
+# Date and time picker
+appointment_date = st.sidebar.date_input("Appointment Date")
+appointment_time = st.sidebar.time_input("Appointment Time")
 
-df = pd.DataFrame({
-    "x": x,
-    "y": y,
-    "idx": indices,
-    "rand": np.random.randn(num_points),
-})
+# Button to schedule appointment
+if st.sidebar.button("Schedule Appointment"):
+    # Create a DataFrame to store appointment details
+    appointments_df = pd.DataFrame({
+        "Patient Name": [patient_name],
+        "Patient Age": [patient_age],
+        "Patient Gender": [patient_gender],
+        "Appointment Date": [appointment_date],
+        "Appointment Time": [appointment_time]
+    })
 
-st.altair_chart(alt.Chart(df, height=700, width=700)
-    .mark_point(filled=True)
-    .encode(
-        x=alt.X("x", axis=None),
-        y=alt.Y("y", axis=None),
-        color=alt.Color("idx", legend=None, scale=alt.Scale()),
-        size=alt.Size("rand", legend=None, scale=alt.Scale(range=[1, 150])),
-    ))
+    # Append new appointment to existing appointments (if any)
+    if "Appointments" in st.session_state:
+        st.session_state.Appointments = st.session_state.Appointments.append(appointments_df, ignore_index=True)
+    else:
+        st.session_state.Appointments = appointments_df
+
+    # Confirmation message
+    st.success("Appointment scheduled successfully!")
+
+# Display scheduled appointments
+st.header("Scheduled Appointments")
+if "Appointments" in st.session_state:
+    st.write(st.session_state.Appointments)
+else:
+    st.info("No appointments scheduled yet.")
