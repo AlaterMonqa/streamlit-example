@@ -3,7 +3,46 @@ import numpy as np
 import pandas as pd
 import streamlit as st
 
+import sqlite3
 
+# Function to create a database connection
+def create_connection():
+    conn = sqlite3.connect("appointments.db")
+    return conn
+
+# Function to create the appointments table in the database
+def create_table(conn):
+    create_table_sql = """
+    CREATE TABLE IF NOT EXISTS appointments (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        patient_name TEXT NOT NULL,
+        patient_age INTEGER,
+        patient_gender TEXT,
+        patient_issues TEXT,
+        appointment_date DATE,
+        appointment_time TIME
+    );
+    """
+    conn.execute(create_table_sql)
+
+# Function to insert an appointment into the database
+def insert_appointment(conn, appointment):
+    insert_sql = """
+    INSERT INTO appointments (patient_name, patient_age, patient_gender, patient_issues, appointment_date, appointment_time)
+    VALUES (?, ?, ?, ?, ?, ?)
+    """
+    conn.execute(insert_sql, appointment)
+    conn.commit()
+
+# Function to retrieve all appointments from the database
+def get_all_appointments(conn):
+    select_sql = "SELECT * FROM appointments"
+    return pd.read_sql(select_sql, conn)
+
+# Create a database connection
+conn = create_connection()
+# Create the appointments table if it doesn't exist
+create_table(conn)
 
 # Page layout
 st.set_page_config(page_title="Appointment Scheduler", page_icon="🏥", layout="wide")
@@ -24,31 +63,23 @@ appointment_time = st.sidebar.time_input("Appointment Time")
 
 # Button to schedule appointment
 if st.sidebar.button("Schedule Appointment"):
-    # Create a DataFrame for the new appointment
-    new_appointment = pd.DataFrame({
-        "Patient Name": [patient_name],
-        "Patient Age": [patient_age],
-        "Patient Gender": [patient_gender],
-        "Patient Issues": [patient_issues],
-        "Appointment Date": [appointment_date],
-        "Appointment Time": [appointment_time]
-    })
-
-    # Concatenate the new appointment DataFrame with existing appointments (if any)
-    if "Appointments" in st.session_state:
-        st.session_state.Appointments = pd.concat([st.session_state.Appointments, new_appointment], ignore_index=True)
-    else:
-        st.session_state.Appointments = new_appointment
-
+    # Insert the appointment into the database
+    appointment_data = (patient_name, patient_age, patient_gender, patient_issues, appointment_date, appointment_time)
+    insert_appointment(conn, appointment_data)
     # Confirmation message
     st.success("Appointment scheduled successfully!")
 
 # Display scheduled appointments
 st.header("Scheduled Appointments")
-if "Appointments" in st.session_state:
-    st.write(st.session_state.Appointments)
+appointments_df = get_all_appointments(conn)
+if not appointments_df.empty:
+    st.write(appointments_df)
 else:
     st.info("No appointments scheduled yet.")
+
+
+
+
 
 
 
