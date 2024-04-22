@@ -5,6 +5,7 @@ import streamlit as st
 
 
 
+
 # Page layout
 st.set_page_config(page_title="Appointment Scheduler", page_icon="🏥", layout="wide")
 
@@ -47,3 +48,5 @@ if "Appointments" in st.session_state:
     st.write(st.session_state.Appointments)
 else:
     st.info("No appointments scheduled yet.")
+
+
