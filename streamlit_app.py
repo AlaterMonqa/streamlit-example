@@ -123,7 +123,7 @@ elif option == "Create Account":
     new_username = st.text_input("Enter username")
     new_password = st.text_input("Enter password", type="password")
     user_type = st.radio("Select account type", ("Patient", "Doctor"))
-    create_account_button = st.button("Create Account")
+    st.button("Create Account")
 
     if st.button("Create Account"):
         add_user(new_username, new_password, user_type)
