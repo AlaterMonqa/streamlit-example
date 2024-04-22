@@ -6,6 +6,8 @@ import streamlit as st
 
 
 
+
+
 # Page layout
 st.set_page_config(page_title="Appointment Scheduler", page_icon="🏥", layout="wide")
 
@@ -24,8 +26,8 @@ appointment_time = st.sidebar.time_input("Appointment Time")
 
 # Button to schedule appointment
 if st.sidebar.button("Schedule Appointment"):
-    # Create a DataFrame to store appointment details
-    appointments_df = pd.DataFrame({
+    # Create a DataFrame for the new appointment
+    new_appointment = pd.DataFrame({
         "Patient Name": [patient_name],
         "Patient Age": [patient_age],
         "Patient Gender": [patient_gender],
@@ -33,11 +35,11 @@ if st.sidebar.button("Schedule Appointment"):
         "Appointment Time": [appointment_time]
     })
 
-    # Append new appointment to existing appointments (if any)
+    # Concatenate the new appointment DataFrame with existing appointments (if any)
     if "Appointments" in st.session_state:
-        st.session_state.Appointments = st.session_state.Appointments.append(appointments_df, ignore_index=True)
+        st.session_state.Appointments = pd.concat([st.session_state.Appointments, new_appointment], ignore_index=True)
     else:
-        st.session_state.Appointments = appointments_df
+        st.session_state.Appointments = new_appointment
 
     # Confirmation message
     st.success("Appointment scheduled successfully!")
@@ -48,5 +50,3 @@ if "Appointments" in st.session_state:
     st.write(st.session_state.Appointments)
 else:
     st.info("No appointments scheduled yet.")
-
-
