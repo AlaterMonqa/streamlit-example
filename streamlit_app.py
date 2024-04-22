@@ -3,7 +3,9 @@ import numpy as np
 import pandas as pd
 import streamlit as st
 
+
 import sqlite3
+from datetime import datetime
 
 # Function to create a database connection
 def create_connection():
@@ -19,8 +21,8 @@ def create_table(conn):
         patient_age INTEGER,
         patient_gender TEXT,
         patient_issues TEXT,
-        appointment_date DATE,
-        appointment_time TIME
+        appointment_date TEXT,
+        appointment_time TEXT
     );
     """
     conn.execute(create_table_sql)
@@ -63,8 +65,10 @@ appointment_time = st.sidebar.time_input("Appointment Time")
 
 # Button to schedule appointment
 if st.sidebar.button("Schedule Appointment"):
+    # Convert time to string
+    appointment_time_str = appointment_time.strftime("%H:%M")
     # Insert the appointment into the database
-    appointment_data = (patient_name, patient_age, patient_gender, patient_issues, appointment_date, appointment_time)
+    appointment_data = (patient_name, patient_age, patient_gender, patient_issues, str(appointment_date), appointment_time_str)
     insert_appointment(conn, appointment_data)
     # Confirmation message
     st.success("Appointment scheduled successfully!")
@@ -76,12 +80,3 @@ if not appointments_df.empty:
     st.write(appointments_df)
 else:
     st.info("No appointments scheduled yet.")
-
-
-
-
-
-
-
-
-
