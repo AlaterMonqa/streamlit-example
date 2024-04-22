@@ -73,6 +73,7 @@ def schedule_appointment(patient_name, doctor_name, appointment_date, appointmen
 create_tables()
 #Main page
 def PD_Page():
+      st.header("Please fill the patient details")
       patient_name = st.text_input("Enter patient name")
       age = st.number_input("Enter age", min_value=1, max_value=150)
       gender = st.radio("Select gender", ("Male", "Female", "Other"))
