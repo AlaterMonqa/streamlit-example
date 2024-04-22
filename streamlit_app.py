@@ -82,10 +82,10 @@ def PD_Page():
 
 #Patient dashboard
 def  Patient_Dashboard():
-st.header("Patient details")
-patient_details = get_patient_details(username)
-st.write("Username:", username)
-st.write("Patient Name:", patient_details[2])  # 2nd column is patient_name
+ st.header("Patient details")
+ patient_details = get_patient_details(username)
+ st.write("Username:", username)
+ st.write("Patient Name:", patient_details[2])  # 2nd column is patient_name
 # Display other patient details here
 #Doctor dashboard
 def Dr():
