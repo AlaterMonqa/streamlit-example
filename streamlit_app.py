@@ -38,6 +38,10 @@ def create_tables():
                     appointment_time TEXT
                  )''')
 
+# Streamlit UI
+st.title("Hospital Management System")
+# Sidebar
+option = st.sidebar.selectbox("Menu", ["Login", "Create Account"])
 # Function to add a new user
 def add_user(username, password, user_type):
     c.execute("INSERT INTO users (username, password, user_type) VALUES (?, ?, ?)", (username, password, user_type))
@@ -67,12 +71,29 @@ def schedule_appointment(patient_name, doctor_name, appointment_date, appointmen
 
 # Create tables if they don't exist
 create_tables()
+#Main page
+def PD_Page():
+      patient_name = st.text_input("Enter patient name")
+      age = st.number_input("Enter age", min_value=1, max_value=150)
+      gender = st.radio("Select gender", ("Male", "Female", "Other"))
+      issues = st.text_area("Enter patient issues")
+      add_patient(new_username, patient_name, age, gender, issues)
+      st.success("Patient details added successfully!")
 
-# Streamlit UI
-st.title("Hospital Management System")
+#Patient dashboard
+def  Patient_Dashboard():
+st.header("Patient details")
+patient_details = get_patient_details(username)
+st.write("Username:", username)
+st.write("Patient Name:", patient_details[2])  # 2nd column is patient_name
+# Display other patient details here
+#Doctor dashboard
+def Dr():
+   st.header("Doctor Dashboard")
 
-# Sidebar
-option = st.sidebar.selectbox("Menu", ["Login", "Create Account"])
+    
+
+
 
 # Login Page
 if option == "Login":
@@ -87,13 +108,10 @@ if option == "Login":
             st.success("Login successful!")
             user_type = user[3]  # 3rd column is user_type
             if user_type == 'patient':
-                st.subheader("Patient Details")
-                patient_details = get_patient_details(username)
-                st.write("Username:", username)
-                st.write("Patient Name:", patient_details[2])  # 2nd column is patient_name
-                # Display other patient details here
+                Patient_Dashboard()
+                
             else:
-                st.subheader("Doctor Dashboard")
+               Dr()
                 # Display doctor dashboard
         else:
             st.error("Invalid username or password. Please try again.")
@@ -109,12 +127,9 @@ elif option == "Create Account":
     if create_account_button:
         add_user(new_username, new_password, user_type)
         st.success("Account created successfully!")
+        
         if user_type == "Patient":
-            patient_name = st.text_input("Enter patient name")
-            age = st.number_input("Enter age", min_value=1, max_value=150)
-            gender = st.radio("Select gender", ("Male", "Female", "Other"))
-            issues = st.text_area("Enter patient issues")
-            add_patient(new_username, patient_name, age, gender, issues)
-            st.success("Patient details added successfully!")
-
+            st.session_state.runpage = PD_page
+            st.experimental_rerun()
+          
 # Additional functionalities like appointment scheduling can be added here
