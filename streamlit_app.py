@@ -130,6 +130,6 @@ elif option == "Create Account":
         
         if user_type == "Patient":
             st.session_state.runpage = PD_Page
-            st.experimental_rerun()
+            st.rerun()
           
 # Additional functionalities like appointment scheduling can be added here
