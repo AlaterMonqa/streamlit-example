@@ -1,137 +1,81 @@
-import altair as alt
-import numpy as np
-import pandas as pd
 import streamlit as st
-from streamlit.state.session_state import SessionState
-
-
-
-
 import sqlite3
-from datetime import datetime, date
+import pandas as pd
 
-# Connect to SQLite database
-conn = sqlite3.connect('hospital.db')
-c = conn.cursor()
+# Function to create database connection and tables if not exist
+def create_database():
+    conn = sqlite3.connect("hospital.db")
+    c = conn.cursor()
 
-# Function to create tables
-def create_tables():
-    c.execute('''CREATE TABLE IF NOT EXISTS users (
-                    id INTEGER PRIMARY KEY,
-                    username TEXT,
-                    password TEXT,
-                    user_type TEXT
-                 )''')
-    c.execute('''CREATE TABLE IF NOT EXISTS patients (
-                    id INTEGER PRIMARY KEY,
-                    username TEXT,
-                    patient_name TEXT,
-                    age INTEGER,
-                    gender TEXT,
-                    issues TEXT
-                 )''')
-    c.execute('''CREATE TABLE IF NOT EXISTS appointments (
-                    id INTEGER PRIMARY KEY,
-                    patient_name TEXT,
-                    doctor_name TEXT,
-                    appointment_date TEXT,
-                    appointment_time TEXT
-                 )''')
+    # Create Patients table if not exists
+    c.execute('''CREATE TABLE IF NOT EXISTS Patients (
+                    PatientID INTEGER PRIMARY KEY,
+                    Name TEXT NOT NULL,
+                    Age INTEGER,
+                    Gender TEXT
+                )''')
 
-# Streamlit UI
-st.title("Hospital Management System")
-# Sidebar
-option = st.sidebar.selectbox("Menu", ["Login", "Create Account"])
-# Function to add a new user
-def add_user(username, password, user_type):
-    c.execute("INSERT INTO users (username, password, user_type) VALUES (?, ?, ?)", (username, password, user_type))
+    # Create Appointments table if not exists
+    c.execute('''CREATE TABLE IF NOT EXISTS Appointments (
+                    AppointmentID INTEGER PRIMARY KEY,
+                    PatientID INTEGER,
+                    Doctor TEXT,
+                    Date TEXT,
+                    FOREIGN KEY(PatientID) REFERENCES Patients(PatientID)
+                )''')
+
     conn.commit()
+    conn.close()
 
-# Function to add a new patient
-def add_patient(username, patient_name, age, gender, issues):
-    c.execute("INSERT INTO patients (username, patient_name, age, gender, issues) VALUES (?, ?, ?, ?, ?)",
-              (username, patient_name, age, gender, issues))
+# Function to save patient details to the database
+def save_patient_details(name, age, gender):
+    conn = sqlite3.connect("hospital.db")
+    c = conn.cursor()
+
+    c.execute('''INSERT INTO Patients (Name, Age, Gender) VALUES (?, ?, ?)''', (name, age, gender))
+
     conn.commit()
+    conn.close()
 
-# Function to authenticate user
-def authenticate(username, password):
-    c.execute("SELECT * FROM users WHERE username = ? AND password = ?", (username, password))
-    return c.fetchone()
+# Function to save appointments to the database
+def save_appointment(patient_id, doctor, date):
+    conn = sqlite3.connect("hospital.db")
+    c = conn.cursor()
 
-# Function to get patient details
-def get_patient_details(username):
-    c.execute("SELECT * FROM patients WHERE username = ?", (username,))
-    return c.fetchone()
+    c.execute('''INSERT INTO Appointments (PatientID, Doctor, Date) VALUES (?, ?, ?)''', (patient_id, doctor, date))
 
-# Function to schedule appointment
-def schedule_appointment(patient_name, doctor_name, appointment_date, appointment_time):
-    c.execute("INSERT INTO appointments (patient_name, doctor_name, appointment_date, appointment_time) VALUES (?, ?, ?, ?)",
-              (patient_name, doctor_name, appointment_date, appointment_time))
     conn.commit()
+    conn.close()
 
-# Create tables if they don't exist
-create_tables()
-#Main page
-def PD_Page():
-      st.header("Please fill the patient details")
-      patient_name = st.text_input("Enter patient name")
-      age = st.number_input("Enter age", min_value=1, max_value=150)
-      gender = st.radio("Select gender", ("Male", "Female", "Other"))
-      issues = st.text_area("Enter patient issues")
-      add_patient(new_username, patient_name, age, gender, issues)
-      st.success("Patient details added successfully!")
+def main():
+    create_database()  # Ensure database and tables are created
 
-#Patient dashboard
-def  Patient_Dashboard():
- st.header("Patient details")
- patient_details = get_patient_details(username)
- st.write("Username:", username)
- st.write("Patient Name:", patient_details[2])  # 2nd column is patient_name
-# Display other patient details here
-#Doctor dashboard
-def Dr():
-   st.header("Doctor Dashboard")
+    st.title("Hospital Management System")
 
-    
+    # Sidebar for navigation
+    page = st.sidebar.radio("Navigation", ["Home", "Add Patient", "Make Appointment"])
 
+    if page == "Home":
+        st.subheader("Welcome to Hospital Management System")
+        st.write("Use the sidebar to navigate.")
 
+    elif page == "Add Patient":
+        st.subheader("Add Patient")
+        name = st.text_input("Name")
+        age = st.number_input("Age", min_value=0, max_value=150)
+        gender = st.radio("Gender", ["Male", "Female"])
+        if st.button("Save"):
+            save_patient_details(name, age, gender)
+            st.success("Patient details saved successfully.")
 
-# Login Page
-if option == "Login":
-    st.header("Login")
-    username = st.text_input("Username")
-    password = st.text_input("Password", type="password")
-    login_button = st.button("Login")
+    elif page == "Make Appointment":
+        st.subheader("Make Appointment")
+        patient_id = st.number_input("Patient ID", min_value=1, step=1)
+        doctor = st.text_input("Doctor's Name")
+        date = st.date_input("Date")
+        if st.button("Save"):
+            save_appointment(patient_id, doctor, date)
+            st.success("Appointment saved successfully.")
 
-    if login_button:
-        user = authenticate(username, password)
-        if user:
-            st.success("Login successful!")
-            user_type = user[3]  # 3rd column is user_type
-            if user_type == 'patient':
-                Patient_Dashboard()
-                
-            else:
-               Dr()
-                # Display doctor dashboard
-        else:
-            st.error("Invalid username or password. Please try again.")
-
-# New Account Creation
-elif option == "Create Account":
-    st.header("Create Account")
-    new_username = st.text_input("Enter username")
-    new_password = st.text_input("Enter password", type="password")
-    user_type = st.radio("Select account type", ("Patient", "Doctor"))
-    create=st.button("Create Account")
-
-    if create:
-        add_user(new_username, new_password, user_type)
-        st.success("Account created successfully!")
-        st.session_state.runpage = PD_Page
-        st.session_state.runpage
-        st.rerun()
-        st.experimental_rerun()
-       # if user_type == "Patient":
-          
-# Additional functionalities like appointment scheduling can be added here
+if __name__ == "__main__":
+    main()
