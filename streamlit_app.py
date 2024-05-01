@@ -60,17 +60,21 @@ def main():
     st.title("Hospital Management System")
 
     # Sidebar for navigation
-    page = st.sidebar.radio("Navigation", ["Home", "Add Patient", "Make Appointment", "Show Appointments"])
+   # page = st.sidebar.radio("Navigation", ["Home", "Login", "Contact", "About"])
 
     if page == "Home":
-        st.subheader("Welcome to Hospital Management System")
+        st.subheader("Welcome to Apollo Hospitals ")
         st.write("Use the sidebar to navigate.")
 
-    elif page == "Add Patient":
-        st.subheader("Add Patient")
-        name = st.text_input("Name")
-        age = st.number_input("Age", min_value=0, max_value=150)
-        gender = st.radio("Gender", ["Male", "Female"])
+    elif page == "Login":
+        st.subheader("Login")
+        
+        username = st.text_input("Usernamme")
+        password = st.text_input("Enter your password:", type="password")
+        if st.button("Sign up"):
+             st.subheader("Create account")
+             username = st.text_input("Usernamme")
+             password = st.text_input("Enter your password:", type="password")
         if st.button("Save"):
             save_patient_details(name, age, gender)
             st.success("Patient details saved successfully.")
